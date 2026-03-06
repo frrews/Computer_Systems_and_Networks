@@ -26,33 +26,49 @@ if not is_admin():
 
 
 def checksum(data):
-    s = 0
-    n = len(data)
+    total = 0
+    i = 0
 
-    for i in range(0, n - n % 2, 2):
-        s += (data[i] << 8) + data[i + 1]
+    # складываем по 2 байта
+    while i < len(data) - 1:
+        word = data[i] * 256 + data[i + 1]  # превращаем 2 байта в число
+        total += word
+        i += 2
 
-    if n % 2:
-        s += data[-1] << 8
+    # если остался один байт
+    if len(data) % 2:
+        total += data[-1] * 256
 
-    s = (s >> 16) + (s & 0xffff)
-    s += (s >> 16)
+    # добавляем переносы
+    while total > 0xffff:
+        total = (total & 0xffff) + (total >> 16)
 
-    return ~s & 0xffff
+    # инверсия
+    total = ~total & 0xffff
+
+    return total
 
 
 def create_packet(seq):
-    pid = os.getpid() & 0xffff
 
-    header = struct.pack("!BBHHH", ICMP_ECHO_REQUEST, 0, 0, pid, seq)
-    data = struct.pack("d", time.time())
+    pid = os.getpid()
+    pid = pid & 0xffff
 
-    chksum = checksum(header + data)
+    icmp_type = ICMP_ECHO_REQUEST
+    code = 0
+    checksum_value = 0
 
-    header = struct.pack("!BBHHH", ICMP_ECHO_REQUEST, 0, chksum, pid, seq)
+    header = struct.pack("!BBHHH",icmp_type, code,checksum_value,pid,seq)
 
-    return header + data
+    current_time = time.time()
+    data = struct.pack("d", current_time)
 
+    packet = header + data
+    checksum_value = checksum(packet)
+
+    header = struct.pack("!BBHHH",icmp_type,code,checksum_value,pid,seq)
+    packet = header + data
+    return packet
 
 def traceroute(dest_name, resolve_names=False):
 
@@ -152,7 +168,7 @@ if __name__ == "__main__":
                 target = parts[2]
 
             else:
-                print("Invalid syntax\n")
+                print("Неверный синтаксис\n")
                 continue
 
             traceroute(target, resolve_names)
