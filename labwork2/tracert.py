@@ -54,7 +54,7 @@ def create_packet(seq):
     return header + data
 
 
-def traceroute(dest_name):
+def traceroute(dest_name, resolve_names=False):
 
     dest_addr = socket.gethostbyname(dest_name)
 
@@ -99,24 +99,72 @@ def traceroute(dest_name):
             seq += 1
 
         if hop_ip:
-            try:
-                hostname = socket.gethostbyaddr(hop_ip)[0]
-                host_display = f"{hostname} ({hop_ip})"
-            except:
+            if resolve_names:
+                try:
+                    hostname = socket.gethostbyaddr(hop_ip)[0]
+                    host_display = f"{hostname} ({hop_ip})"
+                except socket.herror:
+                    host_display = hop_ip
+            else:
                 host_display = hop_ip
         else:
             host_display = "Request timed out"
-
         times_str = "   ".join(f"{t:>8}" for t in times)
 
-        print(f"{ttl:>2}  {host_display:<40} {times_str}")
+        print(f"{ttl:>2}  {times_str}   {host_display}")
 
         if hop_ip == dest_addr:
             break
 
 
 if __name__ == "__main__":
-    target = input("Enter IP or hostname: ")
-    traceroute(target)
 
-    input("\nPress Enter to exit...")
+    print("Custom Traceroute Utility\n")
+    print("Commands:")
+    print("  mytracert host      -> show only IP addresses")
+    print("  mytracert -d host   -> show hostnames and IP")
+    print("Type 'esc' to exit\n")
+
+    while True:
+        try:
+            command = input("Enter command: ").strip()
+
+            if command.lower() == "esc":
+                print("Exiting...")
+                break
+
+            if not command:
+                continue
+
+            parts = command.split()
+
+            if parts[0] != "mytracert":
+                print("Invalid command\n")
+                continue
+
+            resolve_names = False
+
+            if len(parts) == 2:
+                target = parts[1]
+
+            elif len(parts) == 3 and parts[1] == "-d":
+                resolve_names = True
+                target = parts[2]
+
+            else:
+                print("Invalid syntax\n")
+                continue
+
+            traceroute(target, resolve_names)
+
+        except socket.gaierror:
+            print("Error: Unable to resolve hostname\n")
+
+        except PermissionError:
+            print("Error: Administrator privileges required\n")
+
+        except KeyboardInterrupt:
+            print("\nInterrupted\n")
+
+        except Exception as e:
+            print(f"Error: {e}\n")
