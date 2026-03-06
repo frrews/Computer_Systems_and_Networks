@@ -119,18 +119,18 @@ def traceroute(dest_name, resolve_names=False):
 
 if __name__ == "__main__":
 
-    print("Custom Traceroute Utility\n")
-    print("Commands:")
-    print("  mytracert host      -> show only IP addresses")
-    print("  mytracert -d host   -> show hostnames and IP")
-    print("Type 'esc' to exit\n")
+    print("Утилита mytracert\n")
+    print("Команды:")
+    print("  mytracert host      -> показывает только IP адреса")
+    print("  mytracert -d host   -> показывает имена хостов и IP")
+    print("Введите 'esc' для выхода\n")
 
     while True:
         try:
-            command = input("Enter command: ").strip()
+            command = input("Введите команду: ").strip()
 
             if command.lower() == "esc":
-                print("Exiting...")
+                print("Выход...")
                 break
 
             if not command:
@@ -139,7 +139,7 @@ if __name__ == "__main__":
             parts = command.split()
 
             if parts[0] != "mytracert":
-                print("Invalid command\n")
+                print("Неверная команда\n")
                 continue
 
             resolve_names = False
@@ -158,13 +158,13 @@ if __name__ == "__main__":
             traceroute(target, resolve_names)
 
         except socket.gaierror:
-            print("Error: Unable to resolve hostname\n")
+            print("Ошибка: Unable to resolve hostname\n")
 
         except PermissionError:
-            print("Error: Administrator privileges required\n")
+            print("Ошибка: Administrator privileges required\n")
 
         except KeyboardInterrupt:
             print("\nInterrupted\n")
 
         except Exception as e:
-            print(f"Error: {e}\n")
+            print(f"Ошибка: {e}\n")
