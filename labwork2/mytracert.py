@@ -2,19 +2,27 @@ import socket
 import struct
 import time
 import os
+import sys
 import ctypes
-
 
 ICMP_ECHO_REQUEST = 8
 TRIES = 3
 TIMEOUT = 2
 MAX_HOPS = 30
 
+
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
     except:
         return False
+
+
+if not is_admin():
+    ctypes.windll.shell32.ShellExecuteW(
+        None, "runas", sys.executable, " ".join(sys.argv), None, 1
+    )
+    sys.exit()
 
 
 def checksum(data):
@@ -176,3 +184,4 @@ if __name__ == "__main__":
 
         except Exception as e:
             print(f"Ошибка: {e}\n")
+
