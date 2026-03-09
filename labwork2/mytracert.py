@@ -2,7 +2,6 @@ import socket
 import struct
 import time
 import os
-import sys
 import ctypes
 
 
@@ -10,19 +9,6 @@ ICMP_ECHO_REQUEST = 8
 TRIES = 3
 TIMEOUT = 2
 MAX_HOPS = 30
-
-if not ctypes.windll.shell32.IsUserAnAdmin():
-    exe_path = os.path.abspath(sys.argv[0])
-    ctypes.windll.shell32.ShellExecuteW(
-        None,
-        "runas",
-        r"C:\Windows\System32\cmd.exe",
-        f'/k "{exe_path}"',
-        None,
-        1
-    )
-    sys.exit()
-
 
 def is_admin():
     try:
