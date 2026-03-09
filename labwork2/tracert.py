@@ -11,7 +11,6 @@ TRIES = 3
 TIMEOUT = 2
 MAX_HOPS = 30
 
-
 # -------------------- Вставка в самое начало --------------------
 if not ctypes.windll.shell32.IsUserAnAdmin():
     exe_path = os.path.abspath(sys.argv[0])
