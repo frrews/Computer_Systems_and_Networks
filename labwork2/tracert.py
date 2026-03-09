@@ -11,6 +11,21 @@ TRIES = 3
 TIMEOUT = 2
 MAX_HOPS = 30
 
+
+# -------------------- Вставка в самое начало --------------------
+if not ctypes.windll.shell32.IsUserAnAdmin():
+    exe_path = os.path.abspath(sys.argv[0])
+    # Запускаем CMD от администратора и выполняем этот exe
+    ctypes.windll.shell32.ShellExecuteW(
+        None,
+        "runas",
+        r"C:\Windows\System32\cmd.exe",
+        f'/k "{exe_path}"',
+        None,
+        1
+    )
+    sys.exit()
+# -------------------- Конец вставки --------------------
 # -------------------- Новое: функции админ+PATH --------------------
 def run_as_admin():
     """Если нет прав администратора, перезапускаем скрипт с правами админа."""
