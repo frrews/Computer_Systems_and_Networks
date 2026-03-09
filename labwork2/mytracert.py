@@ -11,10 +11,6 @@ TIMEOUT = 2
 MAX_HOPS = 30
 
 
-    sys.exit()
-
-launch_admin_cmd()
-
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
