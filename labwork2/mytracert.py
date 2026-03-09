@@ -10,7 +10,29 @@ TRIES = 3
 TIMEOUT = 2
 MAX_HOPS = 30
 
+def launch_admin_cmd():
 
+    # если уже админ — ничего не делаем
+    if ctypes.windll.shell32.IsUserAnAdmin():
+        return
+
+    exe_path = os.path.abspath(sys.argv[0])
+    exe_dir = os.path.dirname(exe_path)
+
+    cmd_args = f'/k cd /d "{exe_dir}" & "{exe_path}"'
+
+    ctypes.windll.shell32.ShellExecuteW(
+        None,
+        "runas",
+        r"C:\Windows\System32\cmd.exe",
+        cmd_args,
+        None,
+        1
+    )
+
+    sys.exit()
+
+launch_admin_cmd()
 
 def is_admin():
     try:
