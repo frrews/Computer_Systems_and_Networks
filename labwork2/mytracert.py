@@ -133,7 +133,7 @@ def traceroute(dest_name, resolve_names=False):
         if hop_ip == dest_addr:
             break
 
-    print(f"\nТрассировка завершена. (Максимум {MAX_HOPS} прыжков)\n")
+    print(f"\nТрассировка завершена.\n")
 
 
 if __name__ == "__main__":
