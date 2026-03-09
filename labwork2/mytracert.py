@@ -11,16 +11,23 @@ TIMEOUT = 2
 MAX_HOPS = 30
 
 
+
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
     except:
         return False
 
-
 if not is_admin():
+    python_path = f'"{sys.executable}"'
+    script_path = f'"{" ".join(sys.argv)}"'
     ctypes.windll.shell32.ShellExecuteW(
-        None, "runas", sys.executable, " ".join(sys.argv), None, 1
+        None,
+        "runas",
+        "cmd.exe",
+        f'/K ""{sys.executable}" {" ".join(sys.argv)}""',
+        None,
+        1
     )
     sys.exit()
 
@@ -29,21 +36,18 @@ def checksum(data):
     total = 0
     i = 0
 
-    # складываем по 2 байта
     while i < len(data) - 1:
-        word = data[i] * 256 + data[i + 1]  # превращаем 2 байта в число
+        word = data[i] * 256 + data[i + 1]
         total += word
         i += 2
 
-    # если остался один байт
+
     if len(data) % 2:
         total += data[-1] * 256
 
-    # добавляем переносы
     while total > 0xffff:
         total = (total & 0xffff) + (total >> 16)
 
-    # инверсия
     total = ~total & 0xffff
 
     return total
@@ -74,7 +78,8 @@ def traceroute(dest_name, resolve_names=False):
 
     dest_addr = socket.gethostbyname(dest_name)
 
-    print(f"\nTraceroute to {dest_name} ({dest_addr})\n")
+    print(f"\nТрассировка маршрута к {dest_name} ({dest_addr})")
+    print(f"Максимальное количество прыжков: {MAX_HOPS}\n")
 
     seq = 1
 
@@ -111,26 +116,24 @@ def traceroute(dest_name, resolve_names=False):
 
             recv_socket.close()
             send_socket.close()
-
             seq += 1
 
         if hop_ip:
-            if resolve_names:
-                try:
-                    hostname = socket.gethostbyaddr(hop_ip)[0]
-                    host_display = f"{hostname} ({hop_ip})"
-                except socket.herror:
-                    host_display = hop_ip
-            else:
+            try:
+                hostname = socket.gethostbyaddr(hop_ip)[0] if resolve_names else hop_ip
+                host_display = f"{hostname} ({hop_ip})" if resolve_names else hop_ip
+            except socket.herror:
                 host_display = hop_ip
         else:
-            host_display = "Request timed out"
-        times_str = "   ".join(f"{t:>8}" for t in times)
+            host_display = "Время истекло"
 
+        times_str = "   ".join(f"{t:>8}" for t in times)
         print(f"{ttl:>2}  {times_str}   {host_display}")
 
         if hop_ip == dest_addr:
             break
+
+    print(f"\nТрассировка завершена. (Максимум {MAX_HOPS} прыжков)\n")
 
 
 if __name__ == "__main__":
@@ -174,13 +177,13 @@ if __name__ == "__main__":
             traceroute(target, resolve_names)
 
         except socket.gaierror:
-            print("Ошибка: Unable to resolve hostname\n")
+            print("Ошибка: Не удаётся разрешить имя хоста\n")
 
         except PermissionError:
-            print("Ошибка: Administrator privileges required\n")
+            print("Ошибка: Требуются права администратора\n")
 
         except KeyboardInterrupt:
-            print("\nInterrupted\n")
+            print("\nПрервано\n")
 
         except Exception as e:
             print(f"Ошибка: {e}\n")
