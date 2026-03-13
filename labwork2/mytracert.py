@@ -78,7 +78,26 @@ def traceroute(dest_name, resolve_names=False):
 
     dest_addr = socket.gethostbyname(dest_name)
 
-    print(f"\nТрассировка маршрута к {dest_name} ({dest_addr})")
+    # проверяем, является ли ввод IP
+    try:
+        socket.inet_aton(dest_name)
+        is_ip = True
+    except socket.error:
+        is_ip = False
+
+    if resolve_names:
+        try:
+            hostname = socket.gethostbyaddr(dest_addr)[0]
+        except socket.herror:
+            hostname = dest_name
+        print(f"\nТрассировка маршрута к {hostname} ({dest_addr})")
+
+    else:
+        if is_ip:
+            print(f"\nТрассировка маршрута к {dest_addr}")
+        else:
+            print(f"\nТрассировка маршрута к {dest_name} ({dest_addr})")
+
     print(f"Максимальное количество прыжков: {MAX_HOPS}\n")
 
     seq = 1
@@ -109,7 +128,7 @@ def traceroute(dest_name, resolve_names=False):
 
                 hop_ip = addr[0]
                 rtt = (end - start) * 1000
-                times.append(f"{rtt:.2f} ms")
+                times.append(f"{round(rtt)} ms")
 
             except socket.timeout:
                 times.append("*")
@@ -125,7 +144,7 @@ def traceroute(dest_name, resolve_names=False):
             except socket.herror:
                 host_display = hop_ip
         else:
-            host_display = "Время истекло"
+            host_display = "Превышен интервал ожидания для запроса"
 
         times_str = "   ".join(f"{t:>8}" for t in times)
         print(f"{ttl:>2}  {times_str}   {host_display}")
@@ -138,53 +157,32 @@ def traceroute(dest_name, resolve_names=False):
 
 if __name__ == "__main__":
 
-    print("Утилита mytracert\n")
-    print("Команды:")
-    print("  mytracert host      -> показывает только IP адреса")
-    print("  mytracert -d host   -> показывает имена хостов и IP")
-    print("Введите 'esc' для выхода\n")
+    if len(sys.argv) < 2:
+        sys.exit()
 
-    while True:
-        try:
-            command = input("Введите команду: ").strip()
+    resolve_names = False
 
-            if command.lower() == "esc":
-                print("Выход...")
-                break
+    if sys.argv[1] == "-d":
+        if len(sys.argv) < 3:
+            print("Ошибка: не указан хост")
+            sys.exit()
+        resolve_names = True
+        target = sys.argv[2]
+    else:
+        target = sys.argv[1]
 
-            if not command:
-                continue
+    try:
+        traceroute(target, resolve_names)
 
-            parts = command.split()
+    except socket.gaierror:
+        print("Ошибка: Не удаётся разрешить имя хоста")
 
-            if parts[0] != "mytracert":
-                print("Неверная команда\n")
-                continue
+    except PermissionError:
+        print("Ошибка: Требуются права администратора")
 
-            resolve_names = False
+    except KeyboardInterrupt:
+        print("\nПрервано")
 
-            if len(parts) == 2:
-                target = parts[1]
-
-            elif len(parts) == 3 and parts[1] == "-d":
-                resolve_names = True
-                target = parts[2]
-
-            else:
-                print("Неверный синтаксис\n")
-                continue
-
-            traceroute(target, resolve_names)
-
-        except socket.gaierror:
-            print("Ошибка: Не удаётся разрешить имя хоста\n")
-
-        except PermissionError:
-            print("Ошибка: Требуются права администратора\n")
-
-        except KeyboardInterrupt:
-            print("\nПрервано\n")
-
-        except Exception as e:
-            print(f"Ошибка: {e}\n")
+    except Exception as e:
+        print(f"Ошибка: {e}")
 
