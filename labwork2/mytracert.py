@@ -78,7 +78,6 @@ def traceroute(dest_name, resolve_names=False):
 
     dest_addr = socket.gethostbyname(dest_name)
 
-    # проверяем, является ли ввод IP
     try:
         socket.inet_aton(dest_name)
         is_ip = True

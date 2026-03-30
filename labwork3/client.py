@@ -45,8 +45,6 @@ def receive_messages(client_socket):
                 if not stop_event.is_set():
                     print("\n[СИСТЕМА] Соединение закрыто сервером.")
                     stop_event.set()
-                    from concurrent.futures import thread
-                    thread.join()
                 try:
                     client_socket.shutdown(socket.SHUT_RDWR)
                 except:
@@ -55,7 +53,6 @@ def receive_messages(client_socket):
                 break
 
             message = data.decode('utf-8', errors='replace')
-            # Очистка текущей строки ввода и вывод сообщения
             sys.stdout.write("\r" + " " * 60 + "\r")
             print(message)
             sys.stdout.write("Вы: ")
@@ -124,7 +121,7 @@ def start_client():
             response_data = b''
             while True:
                 try:
-                    chunk = client_socket.recv(4096)
+                    chunk = client_socket.recv(1024)
                     if not chunk:
                         break
                     response_data += chunk
@@ -140,7 +137,6 @@ def start_client():
                 continue
 
             response = response_data.decode('utf-8', errors='replace').strip()
-            print(response)
 
             if response.startswith("ERROR:"):
                 print(f"\n[ОТКАЗ СЕРВЕРА] {response}")
@@ -151,6 +147,7 @@ def start_client():
                 client_socket.close()
                 continue
 
+            print(response)
             client_socket.settimeout(None)
 
             thread = threading.Thread(target=receive_messages, args=(client_socket,))

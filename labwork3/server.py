@@ -75,9 +75,9 @@ def handle_client(client_socket, addr):
 
     try:
         with clients_lock:
-            if client_ip == SERVER_IP or client_ip == '127.0.0.1' or client_ip in connected_ips:
-                if client_ip == SERVER_IP or client_ip == '127.0.0.1':
-                    error_msg = "ERROR: Ваше IP совпадает с IP сервера."
+            if client_ip == SERVER_IP or client_ip in connected_ips:
+                if client_ip == SERVER_IP:
+                    error_msg = "ERROR: Ваш IP совпадает с IP сервера."
                 else:
                     error_msg = "ERROR: Пользователь с таким IP уже в чате."
 
@@ -114,7 +114,7 @@ def handle_client(client_socket, addr):
         client_socket.settimeout(None)
 
         while True:
-            data = client_socket.recv(4096)
+            data = client_socket.recv(1024)
             if not data:
                 break
             message = data.decode('utf-8', errors='replace')
