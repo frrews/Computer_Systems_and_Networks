@@ -14,11 +14,9 @@ blacklist_lock = threading.Lock()
 last_mtime = 0
 
 def load_blacklist():
-
     global blacklist, last_mtime
     if not os.path.exists(BLACKLIST_FILE):
         return
-
     try:
         current_mtime = os.path.getmtime(BLACKLIST_FILE)
         if current_mtime > last_mtime:
