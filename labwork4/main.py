@@ -13,7 +13,6 @@ blacklist = []
 blacklist_lock = threading.Lock()
 last_mtime = 0
 
-
 def load_blacklist():
 
     global blacklist, last_mtime
