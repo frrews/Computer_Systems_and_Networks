@@ -118,7 +118,6 @@ def handle_client(client_conn, client_addr):
         target_conn.connect((hostname, port))
 
         new_first_line = f"{method} {path} {protocol}\r\n"
-        # В блоке сборки заголовков:
         modified_request = new_first_line.encode('utf-8')
         if len(header_lines) > 1:
             for line in header_lines[1:]:
@@ -155,7 +154,7 @@ def handle_client(client_conn, client_addr):
         t2.start()
 
     except Exception as e:
-        # print(f"[DEBUG] Ошибка: {e}")
+        print(f"[DEBUG] Ошибка: {e}")
         pass
 
 
